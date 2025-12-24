@@ -5,7 +5,7 @@ export default definePlugin({
     description: "Allows you to theme status colors",
     authors: [{ name: "hexa0", id: 573643611317600256n }],
 
-	getThemedStatusColor(status: string) {
+    getThemedStatusColor(status: string) {
         const varMap: Record<string, string> = {
             online: "--custom-status-online",
             idle: "--custom-status-idle",
@@ -18,15 +18,15 @@ export default definePlugin({
         return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || "#82838b";
     },
 
-	useStatusFillColor(status: string) {
-		return {
-			resolve: () => ({ 
-				hex: () => (this.getThemedStatusColor(status) || "#82838b") 
-			})
-		}
-	},
+    useStatusFillColor(status: string) {
+        return {
+            resolve: () => ({
+                hex: () => (this.getThemedStatusColor(status) || "#82838b")
+            })
+        };
+    },
 
-	patches: [
+    patches: [
         {
             find: "unsafe_rawColors.GREEN_NEW_38",
             replacement: {
