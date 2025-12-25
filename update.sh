@@ -82,4 +82,5 @@ ln -snf "$CURRENT_PATH/base/node_modules" "$CURRENT_PATH/.base.tmp/node_modules"
 ln -snf "$CURRENT_PATH/base/.git" "$CURRENT_PATH/.base.tmp/.git"
 
 echo "running build..."
+cd $CURRENT_PATH/.base.tmp
 sudo unshare -m -u /bin/bash -c "pnpm build" # pnpm is an absolute piece of fucking shit and whoever managed to fuck it up this badly to the point it took me 4 FUCKING hours to find a way to isolate it in a way to trick the stupid ass program to think i am running it manually with absolutely no signs of automatiation is the biggest fucking asshole i have ever seen, how the hell does this even happen and why do i need sudo permissions to build a type script application????????
