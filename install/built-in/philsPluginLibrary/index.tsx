@@ -24,7 +24,10 @@ import { replacedUserPanelComponent } from "./patches";
 const plugin = definePlugin({
     name: "PhilsPluginLibrary",
     description: "A library for phil's plugins",
-    authors: [Devs.philhk],
+    authors: [{
+        name: "philhk",
+        id: 305288513941667851n
+    }],
     patches: [
         {
             find: "--custom-app-panels-height",

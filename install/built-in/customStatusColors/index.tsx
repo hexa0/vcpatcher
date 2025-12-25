@@ -21,7 +21,7 @@ export default definePlugin({
     useStatusFillColor(status: string) {
         return {
             resolve: () => ({
-                hex: () => (this.getThemedStatusColor(status) || "#82838b")
+                hex: () => this.getThemedStatusColor(status)
             })
         };
     },
