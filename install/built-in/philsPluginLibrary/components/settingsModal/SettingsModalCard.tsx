@@ -16,15 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Switch } from "@webpack/common";
-import { Card, Forms } from "@webpack/common";
+import { Card } from "@components/Card";
+import { FormSwitch } from "@components/FormSwitch";
+import { Heading } from "@components/Heading";
+import { Switch } from "@components/Switch";
 import React from "react";
 
 export interface SettingsModalItemProps extends Pick<React.ComponentProps<"div">,
     | "children"> {
     title?: string;
     switchEnabled?: boolean;
-    switchProps?: React.ComponentProps<typeof Switch>;
+    switchProps?: React.ComponentProps<typeof FormSwitch>;
     flex?: number;
     cardProps?: React.ComponentProps<typeof Card>;
 }
@@ -41,7 +43,7 @@ export const SettingsModalCard = ({ children, title, switchProps, switchEnabled,
                 flex: flex ?? 1,
                 ...(cardProps?.style ? cardProps.style : {})
             }}>
-            {title && <Forms.FormTitle tag="h5" style={{ margin: 0 }}>{title}</Forms.FormTitle>}
+            {title && <Heading tag="h5" style={{ margin: 0 }}>{title}</Heading>}
             <div style={{
                 display: "flex",
                 gap: "1em",
@@ -68,7 +70,7 @@ export const SettingsModalCard = ({ children, title, switchProps, switchEnabled,
                         justifyContent: "center",
                         alignItems: "center",
                     }}>
-                        <Forms.FormTitle tag="h5">Status</Forms.FormTitle>
+                        <Heading tag="h5">Status</Heading>
                         <Switch
                             checked={false}
                             onChange={() => void 0}

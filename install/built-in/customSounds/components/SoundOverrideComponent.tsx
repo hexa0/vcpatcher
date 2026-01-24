@@ -10,10 +10,12 @@ import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { useForceUpdater } from "@utils/react";
 import { findByCodeLazy, findLazy } from "@webpack";
-import { Button, Card, Forms, Slider, Switch, useRef } from "@webpack/common";
+import { Button, Forms, Slider, Switch, useRef } from "@webpack/common";
 import { ComponentType, Ref, SyntheticEvent } from "react";
 
 import { SoundOverride, SoundPlayer, SoundType } from "../types";
+import { Card } from "@components/Card";
+import { Heading } from "@components/Heading";
 
 type FileInput = ComponentType<{
     ref: Ref<HTMLInputElement>;
@@ -57,7 +59,7 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
             >
                 Preview
             </Button>
-            <Forms.FormTitle>Replacement Sound</Forms.FormTitle>
+            <Heading>Replacement Sound</Heading>
             <Button
                 color={Button.Colors.PRIMARY}
                 disabled={!override.enabled}
@@ -102,7 +104,7 @@ export function SoundOverrideComponent({ type, override, onChange }: { type: Sou
             >
                 Clear
             </Button>
-            <Forms.FormTitle>Volume</Forms.FormTitle>
+            <Heading>Volume</Heading>
             <Slider
                 markers={makeRange(0, 100, 10)}
                 initialValue={override.volume}
