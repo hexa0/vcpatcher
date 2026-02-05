@@ -30,8 +30,8 @@ export default definePlugin({
         {
             find: "unsafe_rawColors.GREEN_NEW_38",
             replacement: {
-                match: /function \w+\(e\)\{switch\(e\)\{case \i\.\i\.ONLINE:.*?default:return \i\.\i\.unsafe_rawColors\.NEUTRAL_34\}\}/,
-                replace: `function y(e){return $self.useStatusFillColor(e)}`
+                match: /function (\i)\(e\)\{switch\(e\)\{case \i\.\i\.ONLINE:.*?default:return \i\.\i\.unsafe_rawColors\.NEUTRAL_34\}\}/,
+                replace: `function $1(e){return $self.useStatusFillColor(e)}`
             }
         }
     ]
