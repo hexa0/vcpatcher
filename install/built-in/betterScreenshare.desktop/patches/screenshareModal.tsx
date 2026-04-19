@@ -18,7 +18,7 @@
 
 import { Flex } from "@components/Flex";
 import { React } from "@webpack/common";
-import { Settings } from "Vencord";
+import { Settings } from "@api/Settings";
 
 import { SettingsModalCard, SettingsModalCardItem } from "../../philsPluginLibrary";
 import Plugin from "..";
@@ -46,7 +46,8 @@ const ReplacedStreamSettings = () => {
                 cardProps={cardProps}
                 switchEnabled
                 switchProps={{
-                    checked: audioSourceEnabled ?? false,
+                    title: "Audio Source",
+                    value: audioSourceEnabled ?? false,
                     onChange: status => setAudioSourceEnabled(status)
                 }}
                 title="Audio Source">

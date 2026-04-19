@@ -16,21 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Gif } from "userplugins/favoritedGifsProvider";
+import { Gif } from "../favoritedGifsProvider";
 
 export enum Format { NONE = 0, IMAGE = 1, VIDEO = 2 }
 
 export interface Category {
-	type: "Trending" | "Category";
-	name: string;
-	src: string;
-	format: Format;
-	gifs?: Gif[];
+    type: "Trending" | "Category";
+    name: string;
+    src: string;
+    format: Format;
+    gifs?: Gif[];
 }
 
 export interface Props {
-	favorites: { [src: string]: any; };
-	trendingCategories: Category[];
+    favorites: { [src: string]: any; };
+    trendingCategories: Category[];
 }
 
 type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };

@@ -21,33 +21,33 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
-import { favoritedGifs, FavoritedGifsChangedCallback, Gif } from "userplugins/favoritedGifsProvider";
+import { favoritedGifs, FavoritedGifsChangedCallback, Gif } from "../favoritedGifsProvider";
 
 interface SearchBarComponentProps {
-	ref?: React.MutableRefObject<any>;
-	autoFocus: boolean;
-	size: string;
-	onChange: (query: string) => void;
-	onClear: () => void;
-	query: string;
-	placeholder: string;
-	className?: string;
+    ref?: React.MutableRefObject<any>;
+    autoFocus: boolean;
+    size: string;
+    onChange: (query: string) => void;
+    onClear: () => void;
+    query: string;
+    placeholder: string;
+    className?: string;
 }
 
 type TSearchBarComponent =
     React.FC<SearchBarComponentProps>;
 
 interface Instance {
-	dead?: boolean;
-	state: {
-		resultType?: string;
-	};
-	props: {
-		favCopy: Gif[],
+    dead?: boolean;
+    state: {
+        resultType?: string;
+    };
+    props: {
+        favCopy: Gif[],
 
-		favorites: Gif[],
-	},
-	forceUpdate: () => void;
+        favorites: Gif[],
+    },
+    forceUpdate: () => void;
 }
 
 export const settings = definePluginSettings({
@@ -73,75 +73,75 @@ export const settings = definePluginSettings({
 });
 
 export default definePlugin({
-	name: "FavoriteGifSearch ", // extra space added so that it is considered another plugin
-	authors: [Devs.Aria, {
-		name: "hexa",
-		id: 573643611317600256n,
-	}],
-	description: "Adds a search bar to favorite gifs (Patched to use FavoritedGifsProvider).",
-	dependencies: ["FavoritedGifsProvider"],
+    name: "FavoriteGifSearch ", // extra space added so that it is considered another plugin
+    authors: [Devs.Aria, {
+        name: "hexa",
+        id: 573643611317600256n,
+    }],
+    description: "Adds a search bar to favorite gifs (Patched to use FavoritedGifsProvider).",
+    dependencies: ["FavoritedGifsProvider"],
 
-	patches: [
-		{
-			find: "renderHeaderContent()",
-			replacement: [
-				{
-					// https://regex101.com/r/07gpzP/1
-					// ($1 renderHeaderContent=function { ... switch (x) ... case FAVORITES:return) ($2) ($3 case default:return r.jsx(($<searchComp>), {...props}))
-					match: /(renderHeaderContent\(\).{1,150}FAVORITES:return)(.{1,150});(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\..{1,10}),)/,
-					replace: "$1 this.state.resultType === 'Favorites' ? $self.renderSearchBar(this, $<searchComp>) : $2;$3"
-				},
-				// {
-				// 	// to persist filtered favorites when component re-renders.
-				// 	// when resizing the window the component rerenders and we loose the filtered favorites and have to type in the search bar to get them again
-				// 	match: /(,suggestions:\i,favorites:)(\i),/,
-				// 	replace: "$1$self.getFav($2),favCopy:$2,"
-				// }
+    patches: [
+        {
+            find: "renderHeaderContent()",
+            replacement: [
+                {
+                    // https://regex101.com/r/07gpzP/1
+                    // ($1 renderHeaderContent=function { ... switch (x) ... case FAVORITES:return) ($2) ($3 case default:return r.jsx(($<searchComp>), {...props}))
+                    match: /(renderHeaderContent\(\).{1,150}FAVORITES:return)(.{1,150});(case.{1,200}default:return\(0,\i\.jsx\)\((?<searchComp>\i\..{1,10}),)/,
+                    replace: "$1 this.state.resultType === 'Favorites' ? $self.renderSearchBar(this, $<searchComp>) : $2;$3"
+                },
+                // {
+                // 	// to persist filtered favorites when component re-renders.
+                // 	// when resizing the window the component rerenders and we loose the filtered favorites and have to type in the search bar to get them again
+                // 	match: /(,suggestions:\i,favorites:)(\i),/,
+                // 	replace: "$1$self.getFav($2),favCopy:$2,"
+                // }
 
-			]
-		}
-	],
+            ]
+        }
+    ],
 
-	settings,
+    settings,
 
-	getTargetString,
+    getTargetString,
 
-	instance: null as Instance | null,
-	callback: null as FavoritedGifsChangedCallback | null,
+    instance: null as Instance | null,
+    callback: null as FavoritedGifsChangedCallback | null,
 
-	initCallback() {
-		if (this.callback) {
-			const index = favoritedGifs.callbacks.findIndex((callback: FavoritedGifsChangedCallback) => callback === this.callback);
+    initCallback() {
+        if (this.callback) {
+            const index = favoritedGifs.callbacks.findIndex((callback: FavoritedGifsChangedCallback) => callback === this.callback);
 
-			if (index) {
-				favoritedGifs.callbacks.splice(index);
-			}
-		}
+            if (index) {
+                favoritedGifs.callbacks.splice(index);
+            }
+        }
 
-		this.callback = (favorites: favoritedGifs) => {
-			if (!this.instance || this.instance.dead) return favorites;
-			const { favorites: filteredFavorites } = this.instance.props;
+        this.callback = (favorites: favoritedGifs) => {
+            if (!this.instance || this.instance.dead) return favorites;
+            const { favorites: filteredFavorites } = this.instance.props;
 
-			return filteredFavorites != null && filteredFavorites?.length !== favorites.length ? filteredFavorites : favorites;
-		};
+            return filteredFavorites != null && filteredFavorites?.length !== favorites.length ? filteredFavorites : favorites;
+        };
 
-		favoritedGifs.callbacks.push(this.callback);
-	},
+        favoritedGifs.callbacks.push(this.callback);
+    },
 
-	renderSearchBar(instance: Instance, SearchBarComponent: TSearchBarComponent) {
-		if (!this.instance) {
-			this.instance = instance;
-			this.initCallback();
-		}
+    renderSearchBar(instance: Instance, SearchBarComponent: TSearchBarComponent) {
+        if (!this.instance) {
+            this.instance = instance;
+            this.initCallback();
+        }
 
-		this.instance = instance;
+        this.instance = instance;
 
-		return (
-			<ErrorBoundary noop>
-				<SearchBar instance={instance} SearchBarComponent={SearchBarComponent} />
-			</ErrorBoundary>
-		);
-	},
+        return (
+            <ErrorBoundary noop>
+                <SearchBar instance={instance} SearchBarComponent={SearchBarComponent} />
+            </ErrorBoundary>
+        );
+    },
 });
 
 
@@ -149,111 +149,111 @@ function SearchBar({ instance, SearchBarComponent }: { instance: Instance; Searc
     const [query, setQuery] = useState("");
     const ref = useRef<{ containerRef?: React.RefObject<HTMLDivElement>; } | null>(null);
 
-	const onChange = useCallback((searchQuery: string) => {
-		setQuery(searchQuery);
-		const { props } = instance;
+    const onChange = useCallback((searchQuery: string) => {
+        setQuery(searchQuery);
+        const { props } = instance;
 
-		// return early
-		if (searchQuery === "") {
-			props.favorites = favoritedGifs.favorites;
-			instance.forceUpdate();
-			return;
-		}
-
-
-		// scroll back to top
-		ref.current?.containerRef?.current
-			?.closest("#gif-picker-tab-panel")
-			?.querySelector("[class|=\"content\"]")
-			?.firstElementChild?.scrollTo(0, 0);
+        // return early
+        if (searchQuery === "") {
+            props.favorites = favoritedGifs.favorites;
+            instance.forceUpdate();
+            return;
+        }
 
 
-		const result =
-			favoritedGifs.favorites
-				.map(gif => ({
-					score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
-					gif,
-				}))
-				.filter(m => m.score != null) as { score: number; gif: Gif; }[];
+        // scroll back to top
+        ref.current?.containerRef?.current
+            ?.closest("#gif-picker-tab-panel")
+            ?.querySelector("[class|=\"content\"]")
+            ?.firstElementChild?.scrollTo(0, 0);
 
-		result.sort((a, b) => b.score - a.score);
-		props.favorites = result.map(e => e.gif);
 
-		instance.forceUpdate();
-	}, [instance.state]);
+        const result =
+            favoritedGifs.favorites
+                .map(gif => ({
+                    score: fuzzySearch(searchQuery.toLowerCase(), getTargetString(gif.url ?? gif.src).replace(/(%20|[_-])/g, " ").toLowerCase()),
+                    gif,
+                }))
+                .filter(m => m.score != null) as { score: number; gif: Gif; }[];
 
-	useEffect(() => {
-		return () => {
-			instance.dead = true;
-		};
-	}, []);
+        result.sort((a, b) => b.score - a.score);
+        props.favorites = result.map(e => e.gif);
 
-	return (
-		<SearchBarComponent
+        instance.forceUpdate();
+    }, [instance.state]);
+
+    useEffect(() => {
+        return () => {
+            instance.dead = true;
+        };
+    }, []);
+
+    return (
+        <SearchBarComponent
             ref={ref}
             autoFocus={true}
             size="md"
             className=""
             onChange={onChange}
-			onClear={() => {
-				setQuery("");
-				if (instance.props.favorites != null) {
-					instance.props.favorites = favoritedGifs.favorites;
-					instance.forceUpdate();
-				}
-			}}
-			query={query}
-			placeholder="Search Favorite Gifs"
-		/>
-	);
+            onClear={() => {
+                setQuery("");
+                if (instance.props.favorites != null) {
+                    instance.props.favorites = favoritedGifs.favorites;
+                    instance.forceUpdate();
+                }
+            }}
+            query={query}
+            placeholder="Search Favorite Gifs"
+        />
+    );
 }
 
 
 
 export function getTargetString(urlStr: string) {
-	let url: URL;
-	try {
-		url = new URL(urlStr);
-	} catch (err) {
-		// Can't resolve URL, return as-is
-		return urlStr;
-	}
+    let url: URL;
+    try {
+        url = new URL(urlStr);
+    } catch (err) {
+        // Can't resolve URL, return as-is
+        return urlStr;
+    }
 
-	switch (settings.store.searchOption) {
-		case "url":
-			return url.href;
-		case "path":
-			if (url.host === "media.discordapp.net" || url.host === "tenor.com")
-				// /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
-				// /view/some-gif-hi-24248063 -> some-gif-hi-24248063
-				return url.pathname.split("/").at(-1) ?? url.pathname;
-			return url.pathname;
-		case "hostandpath":
-			if (url.host === "media.discordapp.net" || url.host === "tenor.com")
-				return `${url.host} ${url.pathname.split("/").at(-1) ?? url.pathname}`;
-			return `${url.host} ${url.pathname}`;
+    switch (settings.store.searchOption) {
+        case "url":
+            return url.href;
+        case "path":
+            if (url.host === "media.discordapp.net" || url.host === "tenor.com")
+                // /attachments/899763415290097664/1095711736461537381/attachment-1.gif -> attachment-1.gif
+                // /view/some-gif-hi-24248063 -> some-gif-hi-24248063
+                return url.pathname.split("/").at(-1) ?? url.pathname;
+            return url.pathname;
+        case "hostandpath":
+            if (url.host === "media.discordapp.net" || url.host === "tenor.com")
+                return `${url.host} ${url.pathname.split("/").at(-1) ?? url.pathname}`;
+            return `${url.host} ${url.pathname}`;
 
-		default:
-			return "";
-	}
+        default:
+            return "";
+    }
 }
 
 function fuzzySearch(searchQuery: string, searchString: string) {
-	let searchIndex = 0;
-	let score = 0;
+    let searchIndex = 0;
+    let score = 0;
 
-	for (let i = 0; i < searchString.length; i++) {
-		if (searchString[i] === searchQuery[searchIndex]) {
-			score++;
-			searchIndex++;
-		} else {
-			score--;
-		}
+    for (let i = 0; i < searchString.length; i++) {
+        if (searchString[i] === searchQuery[searchIndex]) {
+            score++;
+            searchIndex++;
+        } else {
+            score--;
+        }
 
-		if (searchIndex === searchQuery.length) {
-			return score;
-		}
-	}
+        if (searchIndex === searchQuery.length) {
+            return score;
+        }
+    }
 
-	return null;
+    return null;
 }

@@ -11,7 +11,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Dev } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findByCodeLazy } from "@webpack";
-import { Tooltip } from "webpack/common/components";
+import { Tooltip } from "@webpack/common";
 
 const openPopout = findByCodeLazy(".QUICKSWITCHER_OPENED,{");
 function SearchIcon() {

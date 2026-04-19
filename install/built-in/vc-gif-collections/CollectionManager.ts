@@ -18,7 +18,7 @@
 
 import { DataStore } from "@api/index";
 import { Toasts } from "@webpack/common";
-import { favoritedGifs, Gif } from "userplugins/favoritedGifsProvider";
+import { favoritedGifs, Gif } from "../favoritedGifsProvider";
 
 import { settings } from "./index";
 import { Collection } from "./types";
@@ -33,86 +33,86 @@ export let cache_collections: Collection[] = [];
 export const getCollections = async (): Promise<Collection[]> => (await DataStore.get<Collection[]>(DATA_COLLECTION_NAME)) ?? [];
 
 export const getCollection = async (name: string): Promise<Collection | undefined> => {
-	const collections = await getCollections();
-	return collections.find(c => c.name === name);
+    const collections = await getCollections();
+    return collections.find(c => c.name === name);
 };
 
 export const getCachedCollection = (name: string): Collection | undefined => cache_collections.find(c => c.name === name);
 
 export const createCollection = async (name: string, gifs: Gif[]): Promise<void> => {
 
-	const collections = await getCollections();
-	const duplicateCollection = collections.find(c => c.name === `gc:${name}`);
-	if (duplicateCollection)
-		return Toasts.show({
-			message: "That collection already exists",
-			type: Toasts.Type.FAILURE,
-			id: Toasts.genId(),
-			options: {
-				duration: 3000,
-				position: Toasts.Position.BOTTOM
-			}
-		});
+    const collections = await getCollections();
+    const duplicateCollection = collections.find(c => c.name === `gc:${name}`);
+    if (duplicateCollection)
+        return Toasts.show({
+            message: "That collection already exists",
+            type: Toasts.Type.FAILURE,
+            id: Toasts.genId(),
+            options: {
+                duration: 3000,
+                position: Toasts.Position.BOTTOM
+            }
+        });
 
-	// gifs shouldnt be empty because to create a collection you need to right click an image / gif and then create it yk. but cant hurt to have a null-conditional check RIGHT?
-	const latestGifSrc = gifs[gifs.length - 1]?.src ?? settings.store.defaultEmptyCollectionImage;
-	const collection = {
-		name: `gc:${name}`,
-		src: latestGifSrc,
-		format: getFormat(latestGifSrc),
-		type: "Category",
-		gifs
-	};
+    // gifs shouldnt be empty because to create a collection you need to right click an image / gif and then create it yk. but cant hurt to have a null-conditional check RIGHT?
+    const latestGifSrc = gifs[gifs.length - 1]?.src ?? settings.store.defaultEmptyCollectionImage;
+    const collection = {
+        name: `gc:${name}`,
+        src: latestGifSrc,
+        format: getFormat(latestGifSrc),
+        type: "Category",
+        gifs
+    };
 
-	await DataStore.set(DATA_COLLECTION_NAME, [...collections, collection]);
-	return await refreshCacheCollection();
+    await DataStore.set(DATA_COLLECTION_NAME, [...collections, collection]);
+    return await refreshCacheCollection();
 };
 
 export const addToCollection = async (name: string, gif: Gif): Promise<void> => {
-	const collections = await getCollections();
-	const collectionIndex = collections.findIndex(c => c.name === name);
-	if (collectionIndex === -1) return console.warn("collection not found");
+    const collections = await getCollections();
+    const collectionIndex = collections.findIndex(c => c.name === name);
+    if (collectionIndex === -1) return console.warn("collection not found");
 
-	collections[collectionIndex].gifs.push(gif);
-	collections[collectionIndex].src = gif.src;
-	collections[collectionIndex].format = getFormat(gif.src);
+    collections[collectionIndex].gifs.push(gif);
+    collections[collectionIndex].src = gif.src;
+    collections[collectionIndex].format = getFormat(gif.src);
 
-	await DataStore.set(DATA_COLLECTION_NAME, collections);
-	return await refreshCacheCollection();
+    await DataStore.set(DATA_COLLECTION_NAME, collections);
+    return await refreshCacheCollection();
 
 };
 
 export const removeFromCollection = async (id: string): Promise<void> => {
-	const collections = await getCollections();
-	const collectionIndex = collections.findIndex(c => c.gifs.some(g => g.id === id));
-	if (collectionIndex === -1) return console.warn("collection not found");
+    const collections = await getCollections();
+    const collectionIndex = collections.findIndex(c => c.gifs.some(g => g.id === id));
+    if (collectionIndex === -1) return console.warn("collection not found");
 
-	// Remove The Gif
-	collections[collectionIndex].gifs = collections[collectionIndex].gifs.filter(g => g.id !== id);
+    // Remove The Gif
+    collections[collectionIndex].gifs = collections[collectionIndex].gifs.filter(g => g.id !== id);
 
-	const collection = collections[collectionIndex];
-	const latestGifSrc = collection.gifs.length ? collection.gifs[collection.gifs.length - 1].src : settings.store.defaultEmptyCollectionImage;
-	collections[collectionIndex].src = latestGifSrc;
-	collections[collectionIndex].format = getFormat(latestGifSrc);
+    const collection = collections[collectionIndex];
+    const latestGifSrc = collection.gifs.length ? collection.gifs[collection.gifs.length - 1].src : settings.store.defaultEmptyCollectionImage;
+    collections[collectionIndex].src = latestGifSrc;
+    collections[collectionIndex].format = getFormat(latestGifSrc);
 
-	await DataStore.set(DATA_COLLECTION_NAME, collections);
-	return await refreshCacheCollection();
+    await DataStore.set(DATA_COLLECTION_NAME, collections);
+    return await refreshCacheCollection();
 };
 
 export const deleteCollection = async (name: string): Promise<void> => {
 
-	const collections = await getCollections();
-	const col = collections.filter(c => c.name !== name);
-	await DataStore.set(DATA_COLLECTION_NAME, col);
-	await refreshCacheCollection();
+    const collections = await getCollections();
+    const col = collections.filter(c => c.name !== name);
+    await DataStore.set(DATA_COLLECTION_NAME, col);
+    await refreshCacheCollection();
 };
 
 
 export const refreshCacheCollection = async (): Promise<void> => {
-	cache_collections = await getCollections();
+    cache_collections = await getCollections();
 
-	// this will not work the first time around, but this is good enough to at least get gifs to show up
-	cache_collections.forEach(element => {
-		element.src = GetUpdatedGifCdnUrl(element.src, favoritedGifs.favorites);
-	});
+    // this will not work the first time around, but this is good enough to at least get gifs to show up
+    cache_collections.forEach(element => {
+        element.src = GetUpdatedGifCdnUrl(element.src, favoritedGifs.favorites);
+    });
 };
