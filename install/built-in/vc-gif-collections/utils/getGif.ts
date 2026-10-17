@@ -38,6 +38,15 @@ export function getGifByTarget(url: string, target?: HTMLDivElement | null): Gif
     return getGifByMessageAndUrl(url, message);
 }
 
+export function getGifByPickerEmbed(url: string, target?: HTMLImageElement | null): Gif | null {
+    return {
+        id: uuidv4(),
+        width: target.width,
+        height: target.height,
+        src: target.src,
+        url: url,
+    }
+}
 
 export function getGifByMessageAndTarget(target: HTMLDivElement, message: Message) {
     const url = target.closest('[class^="imageWrapper"]')?.querySelector("video")?.src ?? target.closest('[class^="imageWrapper"]')?.querySelector("img")?.src;
@@ -78,13 +87,25 @@ export function getGifByMessageAndUrl(url: string, message: Message): Gif | null
                 src: embed.image.proxyURL,
                 url: embed.image.url,
             };
-        // Tennor
+
+        // Tenor/Klipy
+        if (embed.provider != null && (embed.provider.name === "Tenor" || embed.provider.name === "Klipy")) {
+            return {
+                id: uuidv4(),
+                height: embed.video.height,
+                width: embed.video.width,
+                src: embed.video.proxyURL,
+                url: embed.url ?? embed.video.url,
+            };
+        }
+
+        // ???
         if (embed.video && embed.video.proxyURL) return {
             id: uuidv4(),
             height: embed.video.height,
             width: embed.video.width,
             src: embed.video.proxyURL,
-            url: embed.provider?.name === "Tenor" ? embed.url ?? embed.video.url : embed.video.url,
+            url: embed.video.url,
         };
 
         // Youtube thumbnails and other stuff idk
@@ -126,7 +147,7 @@ export const getGif = (message: Message | null, url: string | null, target: HTML
     if (url && target && !message) {
         // youtube thumbnail url is message link for some reason eh
         const gif = getGifByTarget(url.startsWith("https://discord.com/") ? target.parentElement?.querySelector("img")?.src ?? url : url, target);
-        if (!gif) return null;
+        if (!gif) return getGifByPickerEmbed(url, target);
 
         return gif;
     }

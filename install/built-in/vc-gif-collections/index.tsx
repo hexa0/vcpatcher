@@ -74,23 +74,30 @@ export const settings = definePluginSettings({
 const addCollectionContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     if (!props) return;
 
-    const { message, itemSrc, itemHref, target } = props;
-
-    const gif = getGif(message, itemSrc ?? itemHref, target);
+    const { message, itemSrc, itemHref, target, link } = props;
+    const gif = getGif(message, itemSrc ?? itemHref ?? link, target);
 
     if (!gif) return;
 
-    const group = findGroupChildrenByChildId("open-native-link", children) ?? findGroupChildrenByChildId("copy-link", children);
-    if (group && !group.some(child => child?.props?.id === "add-to-collection")) {
-        group.push(
-            // if i do it the normal way i get a invalid context menu thingy error -> Menu API only allows Items and groups of Items as children.
-            MenuThingy({ gif })
-        );
+    if (link == null) {
+        const group = findGroupChildrenByChildId("open-native-link", children) ?? findGroupChildrenByChildId("copy-link", children);
+        if (group && !group.some(child => child?.props?.id === "add-to-collection")) {
+            group.push(
+                // if i do it the normal way i get a invalid context menu thingy error -> Menu API only allows Items and groups of Items as children.
+                MenuThingy({ gif })
+            );
+        }
+    }
+    else {
+        if (!children.some(child => child?.props?.id === "remove-from-collection")) {
+            children.push(
+                RemoveMenuThingy({ gif })
+            );
+        }
     }
 };
 
-
-export default definePlugin({
+const gifPlugin = definePlugin({
     name: "FavoriteGifCollection",
     // need better description eh
     description: "Allows you to have collections of GIFs (Patched to use FavoritedGifsProvider).",
@@ -110,6 +117,7 @@ export default definePlugin({
                 },
                 // Hides the gc: from the name gc:monkeh -> monkeh
                 // https://regex101.com/r/uEjLFq/1
+                // this needs to be updated, something in WebpackModule813703.js changed that broke it
                 {
                     match: /(className:\w\.categoryName,children:)(\i)/,
                     replace: "$1$self.hidePrefix($2),"
@@ -163,10 +171,12 @@ export default definePlugin({
         CollectionManager.refreshCacheCollection();
 
         addContextMenuPatch("message", addCollectionContextMenuPatch);
+        addContextMenuPatch("gif-picker", addCollectionContextMenuPatch);
     },
 
     stop() {
         removeContextMenuPatch("message", addCollectionContextMenuPatch);
+        removeContextMenuPatch("gif-picker", addCollectionContextMenuPatch);
     },
     CollectionManager,
 
@@ -225,6 +235,7 @@ export default definePlugin({
 
     collectionContextMenu(e: React.UIEvent, instance) {
         const { item } = instance.props;
+        console.log(item);
         if (item?.name?.startsWith(GIF_COLLECTION_PREFIX))
             return ContextMenuApi.openContextMenu(e, () =>
                 <RemoveItemContextMenu
@@ -332,6 +343,44 @@ const MenuThingy: React.FC<{ gif: Gif; }> = ({ gif }) => {
     );
 };
 
+const RemoveMenuThingy: React.FC<{ gif: Gif; }> = ({ gif }) => {
+    CollectionManager.refreshCacheCollection();
+
+    let targetGifId: string | undefined;
+    let targetGifCollection: string | undefined;
+    for (const col of CollectionManager.cache_collections) {
+        const found = col.gifs.find(g => {
+            const url = g.url || "";
+            return url.includes(gif.url) || url.includes(gif.src);
+        });
+
+        if (found) {
+            targetGifId = found.id;
+            targetGifCollection = col.name.substring(3);
+            break;
+        }
+    }
+
+    return targetGifId != null ? (
+        <Menu.MenuItem
+            label={"Remove From " + targetGifCollection}
+            key="remove-from-collection"
+            id="remove-from-collection"
+            action={() => {
+                if (targetGifId) {
+                    CollectionManager.removeFromCollection(targetGifId).then(() => {
+                        if (gifPlugin) {
+                            // this is not working and needs to be fixed
+                            gifPlugin.sillyInstance.forceUpdate();
+                        }
+                    });
+                }
+            }}
+        >
+        </Menu.MenuItem>
+    ) : null;
+};
+
 interface CreateCollectionModalProps {
     gif: Gif;
     onClose: () => void,
@@ -377,3 +426,4 @@ function CreateCollectionModal({ gif, onClose, modalProps }: CreateCollectionMod
 }
 
 
+export default gifPlugin;
