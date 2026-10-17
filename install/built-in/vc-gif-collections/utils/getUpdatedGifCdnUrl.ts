@@ -20,33 +20,41 @@ import { Gif } from "../types";
 import { cleanUrl } from "./cleanUrl";
 
 export function GetUpdatedGifCdnUrl(url: string, favoritesList: Gif[]) {
-	const cleanedProxyUrl = cleanUrl(url);
-	for (let index = 0; index < favoritesList.length; index++) {
-		const gif = favoritesList[index];
+    if (!url.startsWith("https://media.discordapp.net") && !url.startsWith("https://cdn.discordapp.com")) {
+        return url;
+    }
 
-		const cleanedGifFavoriteProxyUrl = cleanUrl(gif.src);
+    const cleanedProxyUrl = cleanUrl(url);
+    for (let index = 0; index < favoritesList.length; index++) {
+        const gif = favoritesList[index];
 
-		if (cleanedGifFavoriteProxyUrl === cleanedProxyUrl) {
-			return gif.src;
-		}
-	}
+        const cleanedGifFavoriteProxyUrl = cleanUrl(gif.src);
 
-	// no match found :(
-	return url;
+        if (cleanedGifFavoriteProxyUrl === cleanedProxyUrl) {
+            return gif.src;
+        }
+    }
+
+    // no match found :(
+    return url;
 }
 
 export function GetUpdatedGifProxyCdnUrl(url: string, favoritesList: Gif[]) {
-	const cleanedProxyUrl = cleanUrl(url);
-	for (let index = 0; index < favoritesList.length; index++) {
-		const gif = favoritesList[index];
+    if (!url.startsWith("https://media.discordapp.net") && !url.startsWith("https://cdn.discordapp.com")) {
+        return url;
+    }
 
-		const cleanedGifFavoriteProxyUrl = cleanUrl(gif.url);
+    const cleanedProxyUrl = cleanUrl(url);
+    for (let index = 0; index < favoritesList.length; index++) {
+        const gif = favoritesList[index];
 
-		if (cleanedGifFavoriteProxyUrl === cleanedProxyUrl) {
-			return gif.url;
-		}
-	}
+        const cleanedGifFavoriteProxyUrl = cleanUrl(gif.url);
 
-	// no match found :(
-	return url;
+        if (cleanedGifFavoriteProxyUrl === cleanedProxyUrl) {
+            return gif.url;
+        }
+    }
+
+    // no match found :(
+    return url;
 }
