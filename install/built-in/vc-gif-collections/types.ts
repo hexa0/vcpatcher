@@ -16,7 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Gif } from "../favoritedGifsProvider";
+import type { Gif } from "../favoritedGifsProvider";
+
+export type { Gif };
 
 export enum Format { NONE = 0, IMAGE = 1, VIDEO = 2 }
 
